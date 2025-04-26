@@ -7,7 +7,7 @@
 struct Player {
     PlayerBody body;
     Cursor cursor;
-    bool isMenu = false;
+    bool isMenu = true;
 
     Player() : cursor(body.radius) {}
 

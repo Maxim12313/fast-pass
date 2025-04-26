@@ -6,11 +6,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wno-sign-compare
 
 include_directories(include)
 
-file(GLOB SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
-list(REMOVE_ITEM SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
+add_executable(client.out src/client.cpp)
+add_executable(server.out src/server.cpp)
 
-message(STATUS "Source files: ${SOURCE_FILES}")
-
-add_executable(app.exe src/main.cpp ${SOURCE_FILES})
-
-target_link_libraries(app.exe raylib)
+target_link_libraries(client.out raylib)
+target_link_libraries(server.out raylib)

@@ -32,7 +32,6 @@ struct InputSystem {
 
         change = Vector2Scale(Vector2Normalize(change), speed * deltaTime);
         *pos = Vector2Add(*pos, change);
-        std::cout << pos->x << "\n";
     }
 };
 
