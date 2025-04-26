@@ -2,15 +2,15 @@
 #define RUN_HPP
 
 #include "input_system.hpp"
-#include "player.hpp"
+#include "player_body.hpp"
 #include "timer.hpp"
 
-void run() {
+void runGame() {
     InitWindow(WIDTH, HEIGHT, "fast tag");
 
     InputSystem inputSystem;
     Timer timer;
-    Player player;
+    PlayerBody player;
     float deltaTime = 0;
     while (!WindowShouldClose()) {
 

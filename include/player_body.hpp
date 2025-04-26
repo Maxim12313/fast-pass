@@ -12,10 +12,10 @@ struct PlayerBody {
     PlayerBody() : pos(WIDTH / 2, HEIGHT / 2) {}
 
     void draw() const {
-        int x = WIDTH / 2;
-        int y = HEIGHT / 2;
-        DrawCircle(x, y, radius - 10, GRAY);
-        DrawCircleLines(x, y, radius, GRAY);
+        // int x = WIDTH / 2;
+        // int y = HEIGHT / 2;
+        DrawCircle(pos.x, pos.y, radius - 10, GRAY);
+        DrawCircleLines(pos.x, pos.y, radius, GRAY);
     }
 };
 
