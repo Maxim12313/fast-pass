@@ -1,2 +1,7 @@
-const int WINDOW_HEIGHT = 800;
-const int WINDOW_WIDTH = 1200;
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+const int HEIGHT = 800;
+const int WIDTH = 1200;
+
+#endif
