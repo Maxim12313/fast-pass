@@ -1,0 +1,12 @@
+*.o
+*.exe
+*.dSYM/
+*.a
+*.zip
+*.out*
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
