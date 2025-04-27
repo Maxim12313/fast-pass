@@ -1,4 +1,4 @@
-#include "../include/game_server.hpp"
+#include "../include/server.hpp"
 #include <csignal>
 
 bool running = true;
@@ -15,7 +15,7 @@ int main() {
     atexit(enet_deinitialize);
     std::signal(SIGINT, signalHandler);
 
-    GameServer server;
+    Server server;
     while (running) {
         server.handleEvent();
     }

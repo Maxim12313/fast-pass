@@ -1,5 +1,5 @@
-#ifndef GAME_SERVER_HPP
-#define GAME_SERVER_HPP
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include "config.hpp"
 #include "random_generator.hpp"
@@ -11,9 +11,9 @@ struct PeerData {
     uint32_t id;
 };
 
-class GameServer {
+class Server {
 public:
-    GameServer() {
+    Server() {
         address.host = ENET_HOST_ANY;
         address.port = 1234;
         server = enet_host_create(&address, 32, 1, 0, 0);
@@ -62,7 +62,7 @@ public:
         enet_host_destroy(server);
     }
 
-    ~GameServer() { deactivate(); }
+    ~Server() { deactivate(); }
 
 private:
     ENetAddress address;

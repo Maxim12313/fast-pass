@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_HPP
-#define GAME_CLIENT_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
 #include "config.hpp"
 #include "random_generator.hpp"
@@ -7,9 +7,9 @@
 #include <iostream>
 #include <string.h>
 
-class GameClient {
+class Client {
 public:
-    GameClient() {
+    Client() {
         client = enet_host_create(nullptr, 1, 1, 0, 0);
         if (client == nullptr) {
             fprintf(stderr, "An error occurred while trying to create an ENet "
@@ -75,7 +75,7 @@ public:
         }
     }
 
-    ~GameClient() { disconnect(); }
+    ~Client() { disconnect(); }
 
 private:
     ENetAddress address;
