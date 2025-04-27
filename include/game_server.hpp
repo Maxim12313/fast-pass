@@ -1,8 +1,15 @@
 #ifndef GAME_SERVER_HPP
 #define GAME_SERVER_HPP
 
+#include "config.hpp"
+#include "random_generator.hpp"
+#include <cstdint>
 #include <enet/enet.h>
 #include <iostream>
+
+struct PeerData {
+    uint32_t id;
+};
 
 class GameServer {
 public:
@@ -17,28 +24,35 @@ public:
         }
     }
     void handleEvent() {
-        while (enet_host_service(server, &event, 0) > 0) {
-            printf("%d\n", event.type);
+        while (enet_host_service(server, &event, EVENT_WAIT) > 0) {
+            ENetAddress &addr = event.peer->address;
             switch (event.type) {
-            case ENET_EVENT_TYPE_CONNECT:
-                printf("A new client connected from %x:%u.\n",
-                       event.peer->address.host, event.peer->address.port);
-                event.peer->data = (void *)"client stuff";
+            case ENET_EVENT_TYPE_CONNECT: {
+                uint32_t id = idGenerator.getId();
+                printf("client connected from %x:%u giving id %u\n", addr.host,
+                       addr.port, id);
+                PeerData *data = new PeerData(id);
+                event.peer->data = (void *)data;
                 break;
-
-            case ENET_EVENT_TYPE_RECEIVE:
-                printf("A packet of length %u containing %s was received "
-                       "from %s "
+            }
+            case ENET_EVENT_TYPE_RECEIVE: {
+                PeerData *data = (PeerData *)event.peer->data;
+                printf("packet of length %u containing %s was received "
+                       "from %u "
                        "on channel %u.\n",
-                       event.packet->dataLength, event.packet->data,
-                       event.peer->data, event.channelID);
-
+                       event.packet->dataLength, event.packet->data, data->id,
+                       event.channelID);
                 enet_packet_destroy(event.packet);
                 break;
+            }
 
-            case ENET_EVENT_TYPE_DISCONNECT:
-                printf("%s disconnected.\n", event.peer->data);
+            case ENET_EVENT_TYPE_DISCONNECT: {
+                PeerData *data = (PeerData *)event.peer->data;
+                printf("client %u disconnected.\n", data->id);
+                idGenerator.destroyId(data->id);
                 event.peer->data = nullptr;
+                break;
+            }
             }
         }
     }
@@ -54,6 +68,7 @@ private:
     ENetAddress address;
     ENetHost *server;
     ENetEvent event;
+    IDGenerator idGenerator;
 };
 
 #endif

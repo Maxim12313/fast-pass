@@ -1,6 +1,8 @@
 #ifndef GAME_CLIENT_HPP
 #define GAME_CLIENT_HPP
 
+#include "config.hpp"
+#include "random_generator.hpp"
 #include <enet/enet.h>
 #include <iostream>
 #include <string.h>
@@ -39,7 +41,7 @@ public:
         }
     }
     void handleEvent() {
-        while (enet_host_service(client, &event, 0) > 0) {
+        while (enet_host_service(client, &event, EVENT_WAIT) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_RECEIVE:
                 printf(
@@ -61,7 +63,7 @@ public:
 
     void disconnect() {
         enet_peer_disconnect(peer, 0);
-        while (enet_host_service(client, &event, 3000) > 0) {
+        while (enet_host_service(client, &event, 1000) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_RECEIVE:
                 enet_packet_destroy(event.packet);
