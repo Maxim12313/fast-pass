@@ -2,6 +2,7 @@
 #include "../include/client_game.hpp"
 #include <csignal>
 #include <cstdio>
+#include <iostream>
 
 bool running = true;
 
@@ -19,6 +20,7 @@ int main() {
 
     Client client;
     client.connect();
-    ClientGame game(&client);
-    game.run();
+    PlayerBody player(0);
+    player.pos = Vector2{10, 20};
+    client.sendPos(player.pos);
 }

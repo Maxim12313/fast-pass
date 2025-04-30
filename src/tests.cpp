@@ -2,6 +2,7 @@
 #include <csignal>
 #include <cstdio>
 #include <enet/enet.h>
+#include <iostream>
 
 bool running = true;
 
@@ -9,7 +10,7 @@ void signalHandler(int) {
     running = false;
 }
 
-void testClient() {
+void test_client_basic() {
     if (enet_initialize() != 0) {
         fprintf(stderr, "erorr while init enet\n");
         exit(1);
@@ -24,15 +25,18 @@ void testClient() {
         std::getline(std::cin, msg);
         if (msg == "exit()")
             break;
-        client.sendPacket(msg.c_str());
+        client.sendPacket(msg.c_str(), msg.size() + 1);
         client.handleEvent();
     }
 }
-void testClientGame() {
-    // ClientGame game;
-    // game.run();
+
+void test_pos_send_read() {
+    char buffer[1024];
+    Vector2 pos(10, 20);
+    setPos(buffer, pos);
+    Vector2 res = readPos(&buffer[1]);
+    std::cout << res.x << " " << res.y << "\n";
 }
 
 int main() {
-    testClientGame();
 }

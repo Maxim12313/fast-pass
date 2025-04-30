@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "config.hpp"
+#include "messager_maker.hpp"
 #include "random_generator.hpp"
 #include <cstdint>
 #include <enet/enet.h>
@@ -25,34 +26,17 @@ public:
     }
     void handleEvent() {
         while (enet_host_service(server, &event, EVENT_WAIT) > 0) {
-            ENetAddress &addr = event.peer->address;
             switch (event.type) {
-            case ENET_EVENT_TYPE_CONNECT: {
-                uint32_t id = idGenerator.getId();
-                printf("client connected from %x:%u giving id %u\n", addr.host,
-                       addr.port, id);
-                PeerData *data = new PeerData(id);
-                event.peer->data = (void *)data;
+            case ENET_EVENT_TYPE_CONNECT:
+                handleConnect();
                 break;
-            }
-            case ENET_EVENT_TYPE_RECEIVE: {
-                PeerData *data = (PeerData *)event.peer->data;
-                printf("packet of length %u containing %s was received "
-                       "from %u "
-                       "on channel %u.\n",
-                       event.packet->dataLength, event.packet->data, data->id,
-                       event.channelID);
-                enet_packet_destroy(event.packet);
+            case ENET_EVENT_TYPE_RECEIVE:
+                handleReceive();
                 break;
-            }
 
-            case ENET_EVENT_TYPE_DISCONNECT: {
-                PeerData *data = (PeerData *)event.peer->data;
-                printf("client %u disconnected.\n", data->id);
-                idGenerator.destroyId(data->id);
-                event.peer->data = nullptr;
+            case ENET_EVENT_TYPE_DISCONNECT:
+                handleDisconnect();
                 break;
-            }
             }
         }
     }
@@ -69,6 +53,36 @@ private:
     ENetHost *server;
     ENetEvent event;
     IDGenerator idGenerator;
+
+    void handleConnect() {
+        ENetAddress &addr = event.peer->address;
+        uint32_t id = idGenerator.getId();
+        printf("client connected from %x:%u giving id %u\n", addr.host,
+               addr.port, id);
+        PeerData *data = new PeerData(id);
+        event.peer->data = (void *)data;
+    }
+
+    void handleReceive() {
+        PeerData *data = (PeerData *)event.peer->data;
+        printf("packet of length %u containing %s was received "
+               "from %u "
+               "on channel %u.\n",
+               event.packet->dataLength, event.packet->data, data->id,
+               event.channelID);
+
+        char *received = (char *)event.packet->data;
+        Vector2 pos = readPos(&received[1]);
+        std::cout << pos.x << " " << pos.y << "\n";
+        enet_packet_destroy(event.packet);
+    }
+
+    void handleDisconnect() {
+        PeerData *data = (PeerData *)event.peer->data;
+        printf("client %u disconnected.\n", data->id);
+        idGenerator.destroyId(data->id);
+        event.peer->data = nullptr;
+    }
 };
 
 #endif

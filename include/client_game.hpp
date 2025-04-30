@@ -3,7 +3,6 @@
 
 #include "client.hpp"
 #include "config.hpp"
-#include "game.hpp"
 #include "player_system.hpp"
 #include "timer.hpp"
 #include <raylib.h>
@@ -11,18 +10,16 @@
 
 class ClientGame {
 public:
-    ClientGame(Client *client_in) : client(client_in) {
-        playerSystem.addPlayer(0);
-    }
+    ClientGame(Client *client_in) : currPlayer(0), client(client_in) {}
 
     void run() {
         InitWindow(WIDTH, HEIGHT, "fast tag");
         while (!WindowShouldClose()) {
-            playerSystem.input(0, timer.deltaTime);
+            playersInput(currPlayer, timer.deltaTime);
 
             BeginDrawing();
             ClearBackground(DARKBROWN);
-            playerSystem.draw();
+            playersDraw(players);
             timer.displayStats();
             EndDrawing();
 
@@ -34,7 +31,9 @@ public:
 private:
     Client *client;
     Timer timer;
-    PlayerSystem playerSystem;
+
+    std::vector<PlayerBody> players;
+    PlayerBody currPlayer;
 };
 
 #endif

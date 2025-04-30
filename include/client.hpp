@@ -2,9 +2,9 @@
 #define CLIENT_HPP
 
 #include "config.hpp"
-#include "random_generator.hpp"
+#include "messager_maker.hpp"
+#include "player_system.hpp"
 #include <enet/enet.h>
-#include <iostream>
 #include <string.h>
 
 class Client {
@@ -54,13 +54,6 @@ public:
         }
     }
 
-    void sendPacket(const char *msg) {
-        ENetPacket *packet =
-            enet_packet_create(msg, strlen(msg) + 1, ENET_PACKET_FLAG_RELIABLE);
-        enet_peer_send(peer, 0, packet);
-        enet_host_flush(client);
-    }
-
     void disconnect() {
         enet_peer_disconnect(peer, 0);
         while (enet_host_service(client, &event, 1000) > 0) {
@@ -75,6 +68,18 @@ public:
         }
     }
 
+    void sendPos(Vector2 &pos) {
+        uint32_t size = setPos(msg, pos);
+        sendPacket(msg, size);
+    }
+
+    void sendPacket(const char *msg, size_t n) {
+        ENetPacket *packet =
+            enet_packet_create(msg, n, ENET_PACKET_FLAG_RELIABLE);
+        enet_peer_send(peer, 0, packet);
+        enet_host_flush(client);
+    }
+
     ~Client() { disconnect(); }
 
 private:
@@ -82,6 +87,7 @@ private:
     ENetEvent event;
     ENetPeer *peer;
     ENetHost *client;
+    char msg[1024];
 };
 
 #endif
