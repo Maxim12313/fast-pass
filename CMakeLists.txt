@@ -8,12 +8,12 @@ include_directories(include)
 
 add_executable(client.out src/client_app.cpp)
 add_executable(server.out src/server_app.cpp)
-add_executable(app.out src/main.cpp)
+add_executable(tests.out src/tests.cpp)
 
 target_link_libraries(client.out raylib)
 target_link_libraries(server.out raylib)
-target_link_libraries(app.out raylib)
+target_link_libraries(tests.out raylib)
 
 target_link_libraries(client.out enet)
 target_link_libraries(server.out enet)
-target_link_libraries(app.out enet)
+target_link_libraries(tests.out enet)

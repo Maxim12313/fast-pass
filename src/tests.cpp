@@ -1,8 +1,9 @@
-#include "../include/client_game.hpp"
+#include "../include/client.hpp"
 #include <csignal>
 #include <cstdio>
 #include <enet/enet.h>
 #include <iostream>
+#include <raylib.h>
 
 bool running = true;
 
@@ -26,7 +27,6 @@ void test_client_basic() {
         if (msg == "exit()")
             break;
         client.sendPacket(msg.c_str(), msg.size() + 1);
-        client.handleEvent();
     }
 }
 

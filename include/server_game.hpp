@@ -1,47 +1,36 @@
 #ifndef SERVER_GAME_HPP
 #define SERVER_GAME_HPP
 
-#include "client.hpp"
 #include "config.hpp"
 #include "player_system.hpp"
+#include "server.hpp"
 #include "timer.hpp"
 #include <raylib.h>
 #include <vector>
 
-class ClientGame {
+class ServerGame {
 public:
-    enum State {
-        Lobby,
-        Playing,
-    };
-
-    ClientGame() { playerSystem.addPlayer(0); }
-
-    void update() { playerSystem.input(timer.deltaTime); }
-
-    void draw() {
-        BeginDrawing();
-        ClearBackground(DARKBROWN);
-        playerSystem.draw();
-        timer.displayStats();
-        EndDrawing();
-    }
+    ServerGame(Server *server_in) : server(server_in) {}
 
     void run() {
         InitWindow(WIDTH, HEIGHT, "fast tag");
         while (!WindowShouldClose()) {
-            update();
-            draw();
+
+            BeginDrawing();
+            ClearBackground(DARKBROWN);
+            playersDraw(players);
+            timer.displayStats();
+            EndDrawing();
+
             timer.updateOrWait();
         }
         CloseWindow();
     }
 
 private:
+    Server *server;
     Timer timer;
-    PlayerSystem playerSystem;
-    State state = Lobby;
-    Client *client;
+    std::vector<PlayerBody> players;
 };
 
 #endif

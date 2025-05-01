@@ -1,5 +1,6 @@
 #include "../include/client.hpp"
-#include "../include/client_game.hpp"
+#include "../include/game.hpp"
+#include "../include/structs.hpp"
 #include <csignal>
 #include <cstdio>
 #include <iostream>
@@ -18,9 +19,11 @@ int main() {
     atexit(enet_deinitialize);
     std::signal(SIGINT, signalHandler);
 
+    Game game;
+    game.players.emplace_back(0);
+
     Client client;
     client.connect();
-    PlayerBody player(0);
-    player.pos = Vector2{10, 20};
-    client.sendPos(player.pos);
+    client.handleEvent(game);
+    clientGameLoop(game, 0, client);
 }

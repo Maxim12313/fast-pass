@@ -40,16 +40,12 @@ public:
             exit(1);
         }
     }
-    void handleEvent() {
+    void handleEvent(Game &game) {
         while (enet_host_service(client, &event, EVENT_WAIT) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_RECEIVE:
-                printf(
-                    "A packet of length %u containing %s was received from %s "
-                    "on channel %u.\n",
-                    event.packet->dataLength, event.packet->data,
-                    event.peer->data, event.channelID);
-                enet_packet_destroy(event.packet);
+                handleReceive(game);
+                break;
             }
         }
     }
@@ -88,6 +84,14 @@ private:
     ENetPeer *peer;
     ENetHost *client;
     char msg[1024];
+
+    void handleReceive(Game &game) {
+        printf("A packet of length %u containing %s was received from %s "
+               "on channel %u.\n",
+               event.packet->dataLength, event.packet->data, event.peer->data,
+               event.channelID);
+        enet_packet_destroy(event.packet);
+    }
 };
 
 #endif

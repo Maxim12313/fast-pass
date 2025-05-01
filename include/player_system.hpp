@@ -1,6 +1,7 @@
 #ifndef PLAYER_SYSTEM_HPP
 #define PLAYER_SYSTEM_HPP
 
+#include "structs.hpp"
 #include <cstdint>
 #include <raylib.h>
 #include <raymath.h>
@@ -8,16 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-struct PlayerBody {
-    uint8_t id = 0;
-    Vector2 pos = {0, 0};
-    float radius = 50;
-    float speed = 1000;
-    Color color = GRAY;
-    PlayerBody(int id_in) : id(id_in) {}
-};
-
-void playersInput(PlayerBody &player, float deltaTime) {
+void playerInput(PlayerBody &player, float deltaTime) {
     Vector2 change(0, 0);
     if (IsKeyDown(KEY_D))
         change.x++;
@@ -36,8 +28,8 @@ void playersInput(PlayerBody &player, float deltaTime) {
     // send their key strokes
 }
 
-void playersDraw(std::vector<PlayerBody> &bodies) {
-    for (PlayerBody &p : bodies) {
+void playersDraw(Game &g) {
+    for (PlayerBody &p : g.players) {
         DrawCircle(p.pos.x, p.pos.y, p.radius - 10, p.color);
         DrawCircleLines(p.pos.x, p.pos.y, p.radius, p.color);
     }
