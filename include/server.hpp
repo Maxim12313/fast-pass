@@ -9,10 +9,6 @@
 #include <enet/enet.h>
 #include <iostream>
 
-struct PeerData {
-    uint32_t id;
-};
-
 class Server {
 public:
     Server() {
@@ -26,14 +22,14 @@ public:
         }
     }
 
-    void handleEvent(Game &game) {
+    void handleEvent(Game &g) {
         while (enet_host_service(server, &event, EVENT_WAIT) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
-                handleConnect(game);
+                handleConnect(g);
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
-                handleReceive();
+                handleReceive(g);
                 break;
 
             case ENET_EVENT_TYPE_DISCONNECT:
@@ -44,8 +40,8 @@ public:
     }
 
     void sendPacket(const char *toSend, size_t n, uint32_t peerId) {
-        assert(peers.count(peerId) && "peerId not inside");
-        ENetPeer *peer = peers[peerId];
+        assert(toPeer.count(peerId) && "peerId not inside");
+        ENetPeer *peer = toPeer[peerId];
         ENetPacket *packet =
             enet_packet_create(toSend, n, ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send(peer, 0, packet);
@@ -53,7 +49,7 @@ public:
     }
 
     void deactivate() {
-        puts("deactivating");
+        LOG("deactivating");
         enet_host_destroy(server);
     }
 
@@ -63,40 +59,49 @@ private:
     ENetAddress address;
     ENetHost *server;
     ENetEvent event;
-    std::unordered_map<uint32_t, ENetPeer *> peers;
+
+    std::unordered_map<uint32_t, ENetPeer *> toPeer;
+    std::unordered_map<ENetPeer *, uint32_t> toId;
+
     IDGenerator idGenerator;
     char msg[1024];
 
     void handleConnect(Game &g) {
         ENetAddress &addr = event.peer->address;
         uint32_t id = idGenerator.getId();
-        PeerData *data = new PeerData(id);
-        event.peer->data = (void *)data;
-        peers[id] = event.peer;
+
+        toPeer[id] = event.peer;
+        toId[event.peer] = id;
 
         LOG(id << " connected ");
         g.players.emplace_back(id);
-        sendGameState(g);
+        // sendGameState(g);
     }
 
-    void handleReceive() {
-        PeerData *data = (PeerData *)event.peer->data;
-        // printf("packet of length %u containing %s was received "
-        //        "from %u "
-        //        "on channel %u.\n",
-        //        event.packet->dataLength, event.packet->data, data->id,
-        //        event.channelID);
-
+    void handleReceive(Game &g) {
         char *received = (char *)event.packet->data;
-        Vector2 pos = readPos(&received[1]);
+
+        uint32_t id = toId[event.peer];
+
+        Vector2 pos;
+        readPos(pos, &received[1]);
+        for (PlayerBody &body : g.players) {
+            if (body.id == id) {
+                body.pos = pos;
+                break;
+            }
+        }
+
         enet_packet_destroy(event.packet);
     }
 
     void handleDisconnect() {
-        PeerData *data = (PeerData *)event.peer->data;
-        printf("client %u disconnected.\n", data->id);
-        idGenerator.destroyId(data->id);
-        event.peer->data = nullptr;
+        uint32_t id = toId[event.peer];
+        LOG("client " << id << " disconnected");
+
+        idGenerator.destroyId(id);
+        toPeer.erase(id);
+        toId.erase(event.peer);
     }
 
     void sendGameState(Game &g) {

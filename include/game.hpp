@@ -5,30 +5,41 @@
 #include "globals.hpp"
 #include "player_system.hpp"
 #include "server.hpp"
-#include "timer.hpp"
+#include "stats.hpp"
 #include <raylib.h>
 #include <vector>
 
 extern std::atomic<bool> running;
 
 void serverGameLoop(Game &g, Server &server) {
+    InitWindow(WIDTH, HEIGHT, "fast tag server");
     while (running) {
         server.handleEvent(g);
+
+        BeginDrawing();
+
+        ClearBackground(DARKBROWN);
+        playersDraw(g);
+
+        EndDrawing();
     }
+    CloseWindow();
 }
 
 void clientGameLoop(Game &g, int curr, Client &client) {
     PlayerBody &currPlayer = g.players[curr];
 
-    InitWindow(WIDTH, HEIGHT, "fast tag");
+    InitWindow(WIDTH, HEIGHT, "fast tag client");
     Vector2 prevPos = currPlayer.pos;
+    float deltaTime = 0;
     while (!WindowShouldClose() && running) {
-        playerInput(currPlayer, g.timer.deltaTime);
-        playersDraw(g);
+        playerInput(currPlayer, deltaTime);
 
         BeginDrawing();
 
         ClearBackground(DARKBROWN);
+        playersDraw(g);
+        displayStats(deltaTime);
 
         EndDrawing();
 
@@ -37,7 +48,7 @@ void clientGameLoop(Game &g, int curr, Client &client) {
             prevPos = currPlayer.pos;
         }
 
-        g.timer.updateOrWait();
+        deltaTime = GetFrameTime();
     }
     CloseWindow();
 }

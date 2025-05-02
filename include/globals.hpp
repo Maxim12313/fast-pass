@@ -8,8 +8,10 @@
 const int HEIGHT = 800;
 const int WIDTH = 1200;
 
-const int EVENT_WAIT = 100;
+const int EVENT_WAIT = 0;
 const int SERVER_PRECISION = 10;
+
+const int MAX_PLAYERS = 3;
 
 std::atomic<bool> running = true;
 

@@ -10,6 +10,7 @@
 extern std::atomic<bool> running;
 
 void signalHandler(int) {
+    LOG("running signal handler");
     running = false;
 }
 
@@ -24,8 +25,6 @@ void runClient() {
     game.players.emplace_back(0);
 
     Client client;
-    client.connect();
-    client.handleEvent(game);
     clientGameLoop(game, 0, client);
 }
 
@@ -37,6 +36,7 @@ int main(int argc, char **argv) {
     atexit(enet_deinitialize);
     std::signal(SIGINT, signalHandler);
 
+    SetTargetFPS(60);
     if (argc >= 2 && argv[1][0] == '1') {
         LOG("Running Server");
         runServer();
