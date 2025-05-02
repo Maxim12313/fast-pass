@@ -1,7 +1,7 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include "config.hpp"
+#include "globals.hpp"
 #include "messager_maker.hpp"
 #include "player_system.hpp"
 #include <enet/enet.h>
@@ -31,7 +31,7 @@ public:
         }
 
         /* Wait up to 5 seconds for the connection attempt to succeed. */
-        if (enet_host_service(client, &event, 5000) > 0 &&
+        if (enet_host_service(client, &event, 1000) > 0 &&
             event.type == ENET_EVENT_TYPE_CONNECT) {
             puts("Connection succeeded.");
         } else {
@@ -69,9 +69,8 @@ public:
         sendPacket(msg, size);
     }
 
-    void sendPacket(const char *msg, size_t n) {
-        ENetPacket *packet =
-            enet_packet_create(msg, n, ENET_PACKET_FLAG_RELIABLE);
+    void sendPacket(const char *toSend, size_t n) {
+        ENetPacket *packet = enet_packet_create(toSend, n, 0);
         enet_peer_send(peer, 0, packet);
         enet_host_flush(client);
     }

@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "config.hpp"
+#include "globals.hpp"
 #include "messager_maker.hpp"
 #include "random_generator.hpp"
 #include <cassert>
@@ -26,11 +26,11 @@ public:
         }
     }
 
-    void handleEvent() {
+    void handleEvent(Game &game) {
         while (enet_host_service(server, &event, EVENT_WAIT) > 0) {
             switch (event.type) {
             case ENET_EVENT_TYPE_CONNECT:
-                handleConnect();
+                handleConnect(game);
                 break;
             case ENET_EVENT_TYPE_RECEIVE:
                 handleReceive();
@@ -43,11 +43,11 @@ public:
         }
     }
 
-    void sendPacket(const char *msg, size_t n, uint32_t peerId) {
+    void sendPacket(const char *toSend, size_t n, uint32_t peerId) {
         assert(peers.count(peerId) && "peerId not inside");
         ENetPeer *peer = peers[peerId];
         ENetPacket *packet =
-            enet_packet_create(msg, n, ENET_PACKET_FLAG_RELIABLE);
+            enet_packet_create(toSend, n, ENET_PACKET_FLAG_RELIABLE);
         enet_peer_send(peer, 0, packet);
         enet_host_flush(server);
     }
@@ -64,20 +64,19 @@ private:
     ENetHost *server;
     ENetEvent event;
     std::unordered_map<uint32_t, ENetPeer *> peers;
-
     IDGenerator idGenerator;
+    char msg[1024];
 
-    void handleConnect() {
+    void handleConnect(Game &g) {
         ENetAddress &addr = event.peer->address;
         uint32_t id = idGenerator.getId();
-        printf("client connected from %x:%u giving id %u\n", addr.host,
-               addr.port, id);
         PeerData *data = new PeerData(id);
         event.peer->data = (void *)data;
         peers[id] = event.peer;
 
-        char *msg = "hello there";
-        sendPacket(msg, strlen(msg) + 1, id);
+        LOG(id << " connected ");
+        g.players.emplace_back(id);
+        sendGameState(g);
     }
 
     void handleReceive() {
@@ -90,7 +89,6 @@ private:
 
         char *received = (char *)event.packet->data;
         Vector2 pos = readPos(&received[1]);
-        std::cout << pos.x << " " << pos.y << "\n";
         enet_packet_destroy(event.packet);
     }
 
@@ -99,6 +97,13 @@ private:
         printf("client %u disconnected.\n", data->id);
         idGenerator.destroyId(data->id);
         event.peer->data = nullptr;
+    }
+
+    void sendGameState(Game &g) {
+        uint32_t offset = 0;
+        for (PlayerBody &body : g.players) {
+            offset += setPos(&msg[offset], body.pos);
+        }
     }
 };
 

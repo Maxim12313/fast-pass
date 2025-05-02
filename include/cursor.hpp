@@ -1,7 +1,7 @@
 #ifndef CURSOR_HPP
 #define CURSOR_HPP
 
-#include "config.hpp"
+#include "globals.hpp"
 #include <raylib.h>
 
 struct Cursor {
